@@ -1,0 +1,20 @@
+# templates/service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "goldengate.fullname" . }}
+  labels:
+    app: {{ include "goldengate.name" . }}
+    chart: {{ include "goldengate.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+  selector:
+    app: {{ include "goldengate.name" . }}
+    release: {{ .Release.Name }}
