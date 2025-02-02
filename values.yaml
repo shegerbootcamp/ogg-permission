@@ -1,42 +1,26 @@
-# values.yaml
-
 replicaCount: 1
-
 image:
-  repository: cloudsheger/goldengate-free  # Replace with your Docker image
+  repository: cloudsheger/goldengate-free
   tag: latest
   pullPolicy: IfNotPresent
-
-service:
-  type: ClusterIP
-  port: 8080
-
 resources:
   limits:
+    cpu: "2"
+    memory: "4Gi"
+  requests:
     cpu: "1"
     memory: "2Gi"
-  requests:
-    cpu: "500m"
-    memory: "1Gi"
-
+service:
+  type: ClusterIP
+  port: 443
 persistence:
   enabled: true
-  storageClass: "gp3"  # Adjust this based on your cloud provider
-  accessMode: ReadWriteOnce
-  size:
-    goldengate: "10Gi"
-    u02: "10Gi"
-    u03: "10Gi"
-
+  size: 20Gi
+  storageClass: gp3
 config:
-  oggHome: "/u01/app/ogg"
-  oggDeployment: "/u02"
-  oggTemp: "/u03"
-  oggCredentials:
-    username: "oggadmin"
-    password: "oggpassword"
-
-# Fix permissions for /u02 and /u03
-securityContext:
-  fsGroup: 1001880000  # Set the group ID for the volumes 1001880000
-  runAsUser: 1001880000  # Set the user ID for the container 1001880000
+  OGG_HOME: /u01/ogg
+  AdminUsername: oggadmin
+  AdminPassword: Welcome##123
+nodeSelector: {}
+tolerations: []
+affinity: {}

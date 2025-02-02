@@ -1,8 +1,7 @@
-# Chart.yaml
-
 apiVersion: v2
-name: goldengate
-description: A Helm chart for deploying Oracle GoldenGate on Kubernetes
-version: 0.1.0
-appVersion: "1.0"
+name: goldengate-helm-chart
+description: Helm chart for Oracle GoldenGate
+type: application
+version: 1.0.0
+appVersion: 23c
 icon: https://example.com/path/to/icon.png  # Replace with a valid URL to an icon

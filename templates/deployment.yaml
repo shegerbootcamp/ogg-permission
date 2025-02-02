@@ -1,62 +1,36 @@
-# templates/deployment.yaml
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "goldengate.fullname" . }}
+  name: {{ .Release.Name }}-goldengate
   labels:
-    app: {{ include "goldengate.name" . }}
-    chart: {{ include "goldengate.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: goldengate
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "goldengate.name" . }}
-      release: {{ .Release.Name }}
+      app: goldengate
   template:
     metadata:
       labels:
-        app: {{ include "goldengate.name" . }}
-        release: {{ .Release.Name }}
+        app: goldengate
     spec:
-      securityContext:
-        runAsUser: {{ .Values.securityContext.runAsUser }}
-        #fsGroup: {{ .Values.securityContext.fsGroup }}
       containers:
-      - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - containerPort: {{ .Values.service.port }}
-        env:
-        - name: OGG_HOME
-          value: {{ .Values.config.oggHome }}
-        - name: OGG_DEPLOYMENT
-          value: {{ .Values.config.oggDeployment }}
-        - name: OGG_TEMP
-          value: {{ .Values.config.oggTemp }}
-        - name: OGG_SCRPTS
-          value: {{ .Values.config.oggScripts }}    
-        - name: OGG_USERNAME
-          value: {{ .Values.config.oggCredentials.username }}
-        - name: OGG_PASSWORD
-          value: {{ .Values.config.oggCredentials.password }}
-        resources:
-          {{- toYaml .Values.resources | nindent 10 }}
-        volumeMounts:
-        - name: goldengate-data
-          mountPath: {{ .Values.config.oggHome }}
-        - name: goldengate-deployment
-          mountPath: {{ .Values.config.oggDeployment }}
+        - name: goldengate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: OGG_HOME
+              value: "{{ .Values.config.OGG_HOME }}"
+            - name: OGG_ADMIN_USERNAME
+              value: "{{ .Values.config.AdminUsername }}"
+            - name: OGG_ADMIN_PASSWORD
+              value: "{{ .Values.config.AdminPassword }}"
+          volumeMounts:
+            - name: ogg-data
+              mountPath: /u01/app/ogg/data
       volumes:
-      - name: goldengate-data
-        persistentVolumeClaim:
-          claimName: {{ include "goldengate.fullname" . }}-pvc
-      - name: goldengate-deployment
-        persistentVolumeClaim:
-          claimName: {{ include "goldengate.fullname" . }}-u02-pvc
-      - name: goldengate-temp
-        persistentVolumeClaim:
-          claimName: {{ include "goldengate.fullname" . }}-u03-pvc
+        - name: ogg-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc

@@ -1,11 +1,12 @@
-# templates/configmap.yaml
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "goldengate.fullname" . }}-config
+  name: {{ .Release.Name }}-config
   labels:
-    app: {{ include "goldengate.name" . }}
-    chart: {{ include "goldengate.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: goldengate
+data:
+  ggserr.log: |
+    # Custom error logs configuration
+    LogLevel: Info
+  other.config: |
+    # Additional configurations
