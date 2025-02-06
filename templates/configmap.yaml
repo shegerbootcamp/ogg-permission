@@ -5,8 +5,8 @@ metadata:
   labels:
     app: goldengate
 data:
-  ggserr.log: |
-    # Custom error logs configuration
-    LogLevel: Info
-  other.config: |
-    # Additional configurations
+  OGG_HOME: "{{ .Values.config.OGG_HOME }}"
+  OGG_DEPLOYMENT_HOME: "{{ .Values.config.OGG_DEPLOYMENT_HOME }}"
+  OGG_TEMPORARY_FILES: "{{ .Values.config.OGG_TEMPORARY_FILES }}"
+  OGG_DEPLOYMENT_SCRIPTS: "{{ .Values.config.OGG_DEPLOYMENT_SCRIPTS }}"
+  PATH: "/usr/local/bin:${PATH}"

@@ -14,23 +14,59 @@ spec:
       labels:
         app: goldengate
     spec:
+      securityContext:
+        runAsUser: 1001880000
+        runAsGroup: 1001880000
+        fsGroup: 1001880000
+        runAsNonRoot: true
       containers:
         - name: goldengate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           ports:
             - containerPort: {{ .Values.service.port }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsUser: 1001880000
+            runAsGroup: 1001880000
+            readOnlyRootFilesystem: false
           env:
             - name: OGG_HOME
               value: "{{ .Values.config.OGG_HOME }}"
+            - name: OGG_DEPLOYMENT_HOME
+              value: "{{ .Values.config.OGG_DEPLOYMENT_HOME }}"
+            - name: OGG_TEMPORARY_FILES
+              value: "{{ .Values.config.OGG_TEMPORARY_FILES }}"
+            - name: OGG_DEPLOYMENT_SCRIPTS
+              value: "{{ .Values.config.OGG_DEPLOYMENT_SCRIPTS }}"
+            - name: PATH
+              value: "{{ .Values.config.PATH }}"
             - name: OGG_ADMIN_USERNAME
               value: "{{ .Values.config.AdminUsername }}"
             - name: OGG_ADMIN_PASSWORD
               value: "{{ .Values.config.AdminPassword }}"
           volumeMounts:
             - name: ogg-data
-              mountPath: /u01/app/ogg/data
+              mountPath: /u01/ogg
+            - name: ogg-deployment-home
+              mountPath: /u02
+            - name: ogg-temporary-files
+              mountPath: /u03
+            - name: ogg-deployment-scripts
+              mountPath: /u01/ogg/scripts
       volumes:
         - name: ogg-data
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
+            claimName: {{ .Values.pv.oggData.name }}
+        - name: ogg-deployment-home
+          persistentVolumeClaim:
+            claimName: {{ .Values.pv.oggDeploymentHome.name }}
+        - name: ogg-temporary-files
+          persistentVolumeClaim:
+            claimName: {{ .Values.pv.oggTemporaryFiles.name }}
+        - name: ogg-deployment-scripts
+          persistentVolumeClaim:
+            claimName: {{ .Values.pv.oggDeploymentScripts.name }}

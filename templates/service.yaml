@@ -5,9 +5,9 @@ metadata:
   labels:
     app: goldengate
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.service.type }}  # ClusterIP, LoadBalancer, etc.
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.port }}
+    - port: {{ .Values.service.port }}  # The port that the service will expose
+      targetPort: {{ .Values.service.port }}  # The port on the container that the service will forward to
   selector:
-    app: goldengate
+    app: goldengate  # This ensures that the service routes traffic to the Goldengate pod(s)

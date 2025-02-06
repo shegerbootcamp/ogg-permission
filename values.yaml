@@ -1,8 +1,10 @@
 replicaCount: 1
+
 image:
-  repository: cloudsheger/goldengate-free
-  tag: latest
+  repository: cloudsheger/ogg
+  tag: "1.0"
   pullPolicy: IfNotPresent
+
 resources:
   limits:
     cpu: "2"
@@ -10,17 +12,45 @@ resources:
   requests:
     cpu: "1"
     memory: "2Gi"
+
 service:
   type: ClusterIP
   port: 443
+
+pv:
+  oggData:
+    name: "goldengate-pv-ogg-data"
+    size: 10Gi
+    storageClass: gp3
+  oggDeploymentHome:
+    name: "goldengate-pv-ogg-deployment-home"
+    size: 10Gi
+    storageClass: gp3
+  oggTemporaryFiles:
+    name: "goldengate-pv-ogg-temporary-files"
+    size: 10Gi
+    storageClass: gp3
+  oggDeploymentScripts:
+    name: "goldengate-pv-ogg-deployment-scripts"
+    size: 10Gi
+    storageClass: gp3
+
 persistence:
   enabled: true
-  size: 20Gi
-  storageClass: gp3
+
+serviceAccount:
+  create: true
+  name: ""  
+
 config:
   OGG_HOME: /u01/ogg
+  OGG_DEPLOYMENT_HOME: /u02
+  OGG_TEMPORARY_FILES: /u03
+  OGG_DEPLOYMENT_SCRIPTS: /u01/ogg/scripts
+  PATH: "/usr/local/bin:${PATH}"
   AdminUsername: oggadmin
   AdminPassword: Welcome##123
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
