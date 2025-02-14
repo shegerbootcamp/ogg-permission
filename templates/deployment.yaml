@@ -18,12 +18,19 @@ spec:
         runAsUser: {{ .Values.securityContext.runAsUser }}
         runAsGroup: {{ .Values.securityContext.runAsGroup }}
         fsGroup: {{ .Values.securityContext.fsGroup }}
-        runAsNonRoot: true
         supplementalGroups: [1001880000]
+       # allowPrivilegeEscalation: false  # Added at the pod level for extra security
       containers:
         - name: goldengate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true    
+            runAsUser: 1001880000
           ports:
             - name: https
               containerPort: {{ .Values.service.targetPort }}

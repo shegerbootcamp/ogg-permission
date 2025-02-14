@@ -6,4 +6,4 @@ metadata:
     app: goldengate
 data:
   OGG_HOME: "{{ .Values.config.OGG_HOME }}"
-  PATH: "{{ .Values.config.OGG_HOME }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  #PATH: "{{ .Values.config.OGG_HOME }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
