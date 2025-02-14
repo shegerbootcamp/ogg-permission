@@ -1,12 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-config
+  name: {{ .Release.Name }}-goldengate-config
   labels:
     app: goldengate
 data:
   OGG_HOME: "{{ .Values.config.OGG_HOME }}"
-  OGG_DEPLOYMENT_HOME: "{{ .Values.config.OGG_DEPLOYMENT_HOME }}"
-  OGG_TEMPORARY_FILES: "{{ .Values.config.OGG_TEMPORARY_FILES }}"
-  OGG_DEPLOYMENT_SCRIPTS: "{{ .Values.config.OGG_DEPLOYMENT_SCRIPTS }}"
-  PATH: "/usr/local/bin:${PATH}"
+  PATH: "{{ .Values.config.OGG_HOME }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

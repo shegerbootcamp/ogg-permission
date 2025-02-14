@@ -15,58 +15,68 @@ spec:
         app: goldengate
     spec:
       securityContext:
-        runAsUser: 1001880000
-        runAsGroup: 1001880000
-        fsGroup: 1001880000
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
         runAsNonRoot: true
+        supplementalGroups: [1001880000]
       containers:
         - name: goldengate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.service.port }}
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            runAsUser: 1001880000
-            runAsGroup: 1001880000
-            readOnlyRootFilesystem: false
+            - name: https
+              containerPort: {{ .Values.service.targetPort }}
           env:
             - name: OGG_HOME
               value: "{{ .Values.config.OGG_HOME }}"
-            - name: OGG_DEPLOYMENT_HOME
-              value: "{{ .Values.config.OGG_DEPLOYMENT_HOME }}"
-            - name: OGG_TEMPORARY_FILES
-              value: "{{ .Values.config.OGG_TEMPORARY_FILES }}"
-            - name: OGG_DEPLOYMENT_SCRIPTS
-              value: "{{ .Values.config.OGG_DEPLOYMENT_SCRIPTS }}"
-            - name: PATH
-              value: "{{ .Values.config.PATH }}"
             - name: OGG_ADMIN_USERNAME
-              value: "{{ .Values.config.AdminUsername }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-goldengate-secrets
+                  key: OGG_ADMIN_USERNAME
             - name: OGG_ADMIN_PASSWORD
-              value: "{{ .Values.config.AdminPassword }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-goldengate-secrets
+                  key: OGG_ADMIN_PASSWORD
+          {{- if .Values.probes.liveness.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - /usr/local/bin/healthcheck
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          {{- end }}
+          {{- if .Values.probes.readiness.enabled }}
+          readinessProbe:
+            exec:
+              command:
+                - /usr/local/bin/healthcheck
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          {{- end }}
+          resources:
+            requests:
+              memory: "{{ .Values.resources.requests.memory }}"
+              cpu: "{{ .Values.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.resources.limits.memory }}"
+              cpu: "{{ .Values.resources.limits.cpu }}"
+          {{- if or .Values.persistence.existingClaim .Values.pv.oggData.name }}
           volumeMounts:
             - name: ogg-data
-              mountPath: /u01/ogg
-            - name: ogg-deployment-home
-              mountPath: /u02
-            - name: ogg-temporary-files
-              mountPath: /u03
-            - name: ogg-deployment-scripts
-              mountPath: /u01/ogg/scripts
+              mountPath: /u01/app/ogg/data
+          {{- end }}
+      {{- if or .Values.persistence.existingClaim .Values.pv.oggData.name }}
       volumes:
         - name: ogg-data
           persistentVolumeClaim:
-            claimName: {{ .Values.pv.oggData.name }}
-        - name: ogg-deployment-home
-          persistentVolumeClaim:
-            claimName: {{ .Values.pv.oggDeploymentHome.name }}
-        - name: ogg-temporary-files
-          persistentVolumeClaim:
-            claimName: {{ .Values.pv.oggTemporaryFiles.name }}
-        - name: ogg-deployment-scripts
-          persistentVolumeClaim:
-            claimName: {{ .Values.pv.oggDeploymentScripts.name }}
+            claimName: {{ .Values.persistence.existingClaim | default .Values.pv.oggData.name }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name | default .Release.Name }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+      affinity: {{ toYaml .Values.affinity | nindent 8 }}

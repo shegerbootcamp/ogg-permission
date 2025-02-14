@@ -7,7 +7,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}  # ClusterIP, LoadBalancer, etc.
   ports:
-    - port: {{ .Values.service.port }}  # The port that the service will expose
-      targetPort: {{ .Values.service.port }}  # The port on the container that the service will forward to
+    - name: https
+      port: {{ .Values.service.port }}  # The port exposed by the service
+      targetPort: {{ .Values.service.targetPort }}  # Must match the container's port in Deployment.yaml
+      protocol: TCP
   selector:
-    app: goldengate  # This ensures that the service routes traffic to the Goldengate pod(s)
+    app: goldengate  # Ensures traffic routes to the correct pods

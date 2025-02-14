@@ -4,4 +4,14 @@ description: Helm chart for Oracle GoldenGate
 type: application
 version: 1.0.0
 appVersion: 23c
-icon: https://example.com/path/to/icon.png  # Replace with a valid URL to an icon
+icon: https://example.com/path/to/icon.png  # Replace with a valid icon URL
+keywords:
+  - oracle
+  - goldengate
+  - database
+  - replication
+  - helm
+maintainers:
+  - name: Jemal Mohammed
+    email: jemalmoh.cloud@gmail.com  # Replace with a valid email
+    url: https://github.com/shegerbootcamp  # Your actual profile or project link

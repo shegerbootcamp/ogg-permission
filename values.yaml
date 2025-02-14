@@ -2,8 +2,8 @@ replicaCount: 1
 
 image:
   repository: cloudsheger/ogg
-  tag: "1.0"
-  pullPolicy: IfNotPresent
+  tag: latest
+  pullPolicy: Always
 
 resources:
   limits:
@@ -16,40 +16,53 @@ resources:
 service:
   type: ClusterIP
   port: 443
+  targetPort: 8443
 
 pv:
   oggData:
     name: "goldengate-pv-ogg-data"
     size: 10Gi
     storageClass: gp3
-  oggDeploymentHome:
-    name: "goldengate-pv-ogg-deployment-home"
-    size: 10Gi
-    storageClass: gp3
-  oggTemporaryFiles:
-    name: "goldengate-pv-ogg-temporary-files"
-    size: 10Gi
-    storageClass: gp3
-  oggDeploymentScripts:
-    name: "goldengate-pv-ogg-deployment-scripts"
-    size: 10Gi
-    storageClass: gp3
 
 persistence:
   enabled: true
+  existingClaim: ""  # Allows users to specify an existing PVC
 
 serviceAccount:
   create: true
-  name: ""  
+  name: "goldengate"
 
 config:
-  OGG_HOME: /u01/ogg
-  OGG_DEPLOYMENT_HOME: /u02
-  OGG_TEMPORARY_FILES: /u03
-  OGG_DEPLOYMENT_SCRIPTS: /u01/ogg/scripts
-  PATH: "/usr/local/bin:${PATH}"
-  AdminUsername: oggadmin
-  AdminPassword: Welcome##123
+  OGG_HOME: /u01/app/ogg/data
+  #OGG_DEPLOYMENT_HOME: /u02
+  #OGG_TEMPORARY_FILES: /u03
+  #OGG_DEPLOYMENT_SCRIPTS: /u01/ogg/scripts
+
+secrets:
+  adminUsername: oggadmin
+  adminPassword: ENC[AES256_GCM,data=...,iv=...,tag=...,type=str]
+
+probes:
+  liveness:
+    enabled: true
+    initialDelaySeconds: 90
+    periodSeconds: 30
+    failureThreshold: 3
+  readiness:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 3
+
+securityContext:
+  runAsUser: 1001880000
+  runAsGroup: 1001880000
+  fsGroup: 1001880000
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
 
 nodeSelector: {}
 tolerations: []
